@@ -1420,8 +1420,8 @@ int mg_printf(struct mg_connection *conn, const char *fmt, ...) {
 // form-url-encoded data differs from URI encoding in a way that it
 // uses '+' as character for space, see RFC 1866 section 8.2.1
 // http://ftp.ics.uci.edu/pub/ietf/html/rfc1866.txt
-static size_t url_decode(const char *src, size_t src_len, char *dst,
-                         size_t dst_len, int is_form_url_encoded) {
+size_t mg_url_decode(const char *src, size_t src_len, char *dst,
+                     size_t dst_len, int is_form_url_encoded) {
   size_t i, j;
   int a, b;
 #define HEXTOI(x) (isdigit(x) ? x - '0' : x - 'W')
@@ -1477,7 +1477,7 @@ int mg_get_var(const char *buf, size_t buf_len, const char *name,
 
       // Decode variable into destination buffer
       if ((size_t) (s - p) < dst_len) {
-        len = url_decode(p, (size_t)(s - p), dst, dst_len, 1);
+        len = mg_url_decode(p, (size_t)(s - p), dst, dst_len, 1);
       }
       break;
     }
@@ -2279,7 +2279,7 @@ struct de {
   struct mgstat st;
 };
 
-static void url_encode(const char *src, char *dst, size_t dst_len) {
+void mg_url_encode(const char *src, char *dst, size_t dst_len) {
   static const char *dont_escape = "._-$,;~()";
   static const char *hex = "0123456789abcdef";
   const char *end = dst + dst_len - 1;
@@ -2322,7 +2322,7 @@ static void print_dir_entry(struct de *de) {
     }
   }
   (void) strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", localtime(&de->st.mtime));
-  url_encode(de->file_name, href, sizeof(href));
+  mg_url_encode(de->file_name, href, sizeof(href));
   de->conn->num_bytes_sent += mg_printf(de->conn,
       "<tr><td><a href=\"%s%s%s\">%s%s</a></td>"
       "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
@@ -3316,7 +3316,7 @@ static void handle_request(struct mg_connection *conn) {
     * conn->request_info.query_string++ = '\0';
   }
   uri_len = strlen(ri->uri);
-  url_decode(ri->uri, (size_t)uri_len, ri->uri, (size_t)(uri_len + 1), 0);
+  mg_url_decode(ri->uri, (size_t)uri_len, ri->uri, (size_t)(uri_len + 1), 0);
   remove_double_dots_and_double_slashes(ri->uri);
   convert_uri_to_file_name(conn, ri->uri, path, sizeof(path));
 

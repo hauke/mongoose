@@ -225,6 +225,15 @@ const char *mg_version(void);
 //   mg_md5(buf, "aa", "bb", NULL);
 void mg_md5(char *buf, ...);
 
+// URL-decode input buffer into destination buffer.
+// 0-terminate the destination buffer. Return the length of decoded data.
+// form-url-encoded data differs from URI encoding in a way that it
+// uses '+' as character for space, see RFC 1866 section 8.2.1
+// http://ftp.ics.uci.edu/pub/ietf/html/rfc1866.txt
+size_t mg_url_decode(const char *src, size_t src_len, char *dst,
+                     size_t dst_len, int is_form_url_encoded);
+
+void mg_url_encode(const char *src, char *dst, size_t dst_len);
 
 #ifdef __cplusplus
 }
